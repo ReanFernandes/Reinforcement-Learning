@@ -113,13 +113,20 @@ def decaying_epsilon_greedy(mab: MAB, epsilon_init):
 
 def ucb(mab: MAB, c):
     # TODO: Implement upper confidence bound action selection
-    ucb = 
+    if mab.step_counter == 0:
+        return np.argmax(mab.bandit_q_values)
+    confidence_bound = c * np.sqrt((np.log(mab.step_counter) / (mab.bandit_counters+1)))  #added one to denominator to prevent divide by zero
+    action = np.argmax(mab.bandit_q_values + confidence_bound)
+    return action
     # Now that you have implemented the strategy, don't forget to comment in the strategy below
 
 
 def softmax(mab: MAB, tau):
     # TODO: Implement softmax action selection
-    raise NotImplementedError()
+    normalising_factor = np.sum(np.exp(mab.bandit_q_values/tau))  # denominator for softmax
+    action_probabilities = np.exp(mab.bandit_q_values/tau)/normalising_factor
+    action = np.random.choice([i for i in range(len(mab.bandits))], p=action_probabilities)
+    return action
     # Now that you have implemented the strategy, don't forget to comment in the strategy below
 
 
@@ -141,9 +148,9 @@ if __name__ == '__main__':
     # TODO: comment in once you implemented the function: decaying_epsilon_greedy
     strategies[decaying_epsilon_greedy] = {'epsilon_init': epsilon_init}
     # TODO: comment in once you implemented the function: ucb
-    # strategies[ucb] = {'c': c}
+    strategies[ucb] = {'c': c}
     # TODO: comment in once you implemented the function: softmax
-    # strategies[softmax] = {'tau': tau}
+    strategies[softmax] = {'tau': tau}
 
     average_total_returns = {}
     total_regrets = {}
